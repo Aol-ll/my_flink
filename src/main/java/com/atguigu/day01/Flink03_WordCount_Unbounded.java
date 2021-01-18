@@ -19,6 +19,7 @@ public class Flink03_WordCount_Unbounded {
         //1.获取执行环境
 
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
+        env.setParallelism(1);
         //2.读取文件
         DataStreamSource<String> input = env.socketTextStream("hadoop102",9999);
         //3.压平
@@ -27,7 +28,7 @@ public class Flink03_WordCount_Unbounded {
         }).returns(Types.TUPLE(Types.STRING, Types.INT))
                 .keyBy(key -> key.f0)
                 .sum(1)
-                .print().setParallelism(1);
+                .print();
         //4.执行程序
         env.execute();
     }
