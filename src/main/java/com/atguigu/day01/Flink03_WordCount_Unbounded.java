@@ -17,6 +17,7 @@ public class Flink03_WordCount_Unbounded {
     public static void main(String[] args) throws Exception {
 
         //1.获取执行环境
+
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
         //2.读取文件
         DataStreamSource<String> input = env.socketTextStream("localhost",9999);
