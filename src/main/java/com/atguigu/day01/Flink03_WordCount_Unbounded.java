@@ -27,6 +27,7 @@ public class Flink03_WordCount_Unbounded {
                 .keyBy(key -> key.f0)
                 .sum(1)
                 .print().setParallelism(1);
+        //4.执行程序
         env.execute();
     }
 }
