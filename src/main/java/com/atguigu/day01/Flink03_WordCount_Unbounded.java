@@ -3,6 +3,7 @@ package com.atguigu.day01;
 
 import org.apache.flink.api.common.typeinfo.Types;
 import org.apache.flink.api.java.tuple.Tuple2;
+import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.streaming.api.datastream.DataStreamSource;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.util.Collector;
@@ -21,7 +22,10 @@ public class Flink03_WordCount_Unbounded {
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
         env.setParallelism(1);
         //2.读取文件
-        DataStreamSource<String> input = env.socketTextStream("hadoop102",9999);
+        ParameterTool parameterTool = ParameterTool.fromArgs(args);
+
+//        DataStreamSource<String> input = env.socketTextStream("hadoop102",9999);
+        DataStreamSource<String> input = env.socketTextStream(parameterTool.get("host"),parameterTool.getInt("port"));
         //3.压平
         input.flatMap((String line, Collector<Tuple2<String, Integer>> words) -> {
             Arrays.stream(line.split(" ")).forEach(word -> words.collect(Tuple2.of(word, 1)));
