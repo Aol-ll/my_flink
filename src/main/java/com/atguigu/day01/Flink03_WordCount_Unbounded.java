@@ -20,12 +20,12 @@ public class Flink03_WordCount_Unbounded {
         //1.获取执行环境
 
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
-        env.setParallelism(1);
+        env.setParallelism(2);
         //2.读取文件
-        ParameterTool parameterTool = ParameterTool.fromArgs(args);
+//        ParameterTool parameterTool = ParameterTool.fromArgs(args);
 
-//        DataStreamSource<String> input = env.socketTextStream("hadoop102",9999);
-        DataStreamSource<String> input = env.socketTextStream(parameterTool.get("host"),parameterTool.getInt("port"));
+        DataStreamSource<String> input = env.socketTextStream("hadoop102",9999);
+//        DataStreamSource<String> input = env.socketTextStream(parameterTool.get("host"),parameterTool.getInt("port"));
         //3.压平
         input.flatMap((String line, Collector<Tuple2<String, Integer>> words) -> {
             Arrays.stream(line.split(" ")).forEach(word -> words.collect(Tuple2.of(word, 1)));
