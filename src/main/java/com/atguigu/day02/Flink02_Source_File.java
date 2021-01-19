@@ -20,7 +20,7 @@ public class Flink02_Source_File {
         DataStreamSource<String> sensor = env.readTextFile("input/sensor.txt");
 
 
-        SingleOutputStreamOperator<WaterSensor> map = sensor.map((MapFunction<String, WaterSensor>) value -> {
+        SingleOutputStreamOperator<WaterSensor> map = sensor.map(value -> {
             String[] split = value.split(",");
             return new WaterSensor(split[0],Long.parseLong(split[1]),Integer.parseInt(split[2]));
         });
