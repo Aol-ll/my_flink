@@ -42,6 +42,7 @@ public class Flink07_Transform_RichFlatMap {
             }
         }
 
+
         @Override
         public void close() throws Exception {
             System.out.println("停停停");
