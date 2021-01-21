@@ -1,6 +1,7 @@
 package com.atguigu.day03;
 
 import com.atguigu.bean.WaterSensor;
+
 import org.apache.flink.connector.jdbc.JdbcConnectionOptions;
 import org.apache.flink.connector.jdbc.JdbcExecutionOptions;
 import org.apache.flink.connector.jdbc.JdbcSink;
@@ -24,24 +25,28 @@ public class Flink09_Sink_JDBC {
             return new WaterSensor(split[0], Long.parseLong(split[1]), Integer.parseInt(split[2]));
         });
 
+
         map.addSink(JdbcSink.sink(
                 "INSERT INTO `sensor` VALUES(?,?,?) ON DUPLICATE KEY UPDATE `ts`=?,`vc`=?",
-                (pe,l)->{
-                    pe.setString(1,l.getId());
-                    pe.setLong(2,l.getTs());
-                    pe.setInt(3,l.getVc());
-                    pe.setLong(4,l.getTs());
-                    pe.setInt(5,l.getVc());
-                    },
-                new JdbcExecutionOptions.Builder()
-                .withBatchSize(1).build(),
+                (ps, t) -> {
+                    ps.setString(1, t.getId());
+                    ps.setLong(2, t.getTs());
+                    ps.setInt(3, t.getVc());
+                    ps.setLong(4, t.getTs());
+                    ps.setInt(5, t.getVc());
+                },
+                JdbcExecutionOptions.builder()
+                        .withBatchIntervalMs(1)
+                        .build()
+                ,
                 new JdbcConnectionOptions.JdbcConnectionOptionsBuilder()
                         .withUrl("jdbc:mysql://hadoop102:3306/test?useSSL=false")
                         .withDriverName("com.mysql.jdbc.Driver")
                         .withUsername("root")
                         .withPassword("123456")
                         .build()
-                ));
+        ));
+
 
         env.execute();
     }

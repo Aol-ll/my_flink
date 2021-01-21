@@ -5,6 +5,7 @@ import org.apache.flink.streaming.api.datastream.DataStreamSource;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.connectors.redis.RedisSink;
+import org.apache.flink.streaming.connectors.redis.common.config.FlinkJedisConfigBase;
 import org.apache.flink.streaming.connectors.redis.common.config.FlinkJedisPoolConfig;
 import org.apache.flink.streaming.connectors.redis.common.mapper.RedisCommand;
 import org.apache.flink.streaming.connectors.redis.common.mapper.RedisCommandDescription;
@@ -31,26 +32,21 @@ public class Flink06_Sink_Redis {
                 .setPort(6379)
                 .build(),
                 new RedisMapper<WaterSensor>() {
+            @Override
+            public RedisCommandDescription getCommandDescription() {
+                return new RedisCommandDescription(RedisCommand.HSET,"sensor1");
+            }
 
+            @Override
+            public String getKeyFromData(WaterSensor waterSensor) {
+                return waterSensor.getId();
+            }
 
-
-
-                    @Override
-                    public RedisCommandDescription getCommandDescription() {
-                        return new RedisCommandDescription(RedisCommand.HSET,"sensor");
-                    }
-
-                    @Override
-                    public String getKeyFromData(WaterSensor waterSensor) {
-                        return waterSensor.getId();
-                    }
-
-                    @Override
-                    public String getValueFromData(WaterSensor waterSensor) {
-                        return waterSensor.getVc().toString();
-                    }
-                }));
-
+            @Override
+            public String getValueFromData(WaterSensor waterSensor) {
+                return waterSensor.getVc().toString();
+            }
+        }));
 
         env.execute();
     }
