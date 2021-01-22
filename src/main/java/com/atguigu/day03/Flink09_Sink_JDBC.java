@@ -35,10 +35,12 @@ public class Flink09_Sink_JDBC {
                     ps.setLong(4, t.getTs());
                     ps.setInt(5, t.getVc());
                 },
+
                 JdbcExecutionOptions.builder()
                         .withBatchIntervalMs(1)
                         .build()
                 ,
+
                 new JdbcConnectionOptions.JdbcConnectionOptionsBuilder()
                         .withUrl("jdbc:mysql://hadoop102:3306/test?useSSL=false")
                         .withDriverName("com.mysql.jdbc.Driver")
