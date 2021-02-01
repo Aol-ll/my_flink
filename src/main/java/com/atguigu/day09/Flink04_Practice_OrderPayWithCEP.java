@@ -52,7 +52,7 @@ public class Flink04_Practice_OrderPayWithCEP {
             public boolean filter(OrderEvent orderEvent, Context<OrderEvent> context) throws Exception {
                 return "create".equals(orderEvent.getEventType());
             }
-        }).next("next").where(new IterativeCondition<OrderEvent>() {
+        }).followedBy("next").where(new IterativeCondition<OrderEvent>() {
             @Override
             public boolean filter(OrderEvent orderEvent, Context<OrderEvent> context) throws Exception {
                 return "pay".equals(orderEvent.getEventType());
