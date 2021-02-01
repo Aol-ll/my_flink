@@ -8,6 +8,8 @@ import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.api.common.functions.AggregateFunction;
 import org.apache.flink.api.common.state.ListState;
 import org.apache.flink.api.common.state.ListStateDescriptor;
+import org.apache.flink.api.common.state.ValueState;
+import org.apache.flink.api.common.state.ValueStateDescriptor;
 import org.apache.flink.api.common.typeinfo.Types;
 import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.configuration.Configuration;
@@ -84,7 +86,7 @@ public class Flink02_Practice_PageView_Window2 {
         });
 
         //按窗口时间分组，组内用ListState计算
-        aggregate.keyBy(PageViewCount::getTime)
+ /*       aggregate.keyBy(PageViewCount::getTime)
                 .process(new KeyedProcessFunction<Long, PageViewCount, Tuple2<String, Integer>>() {
                     private ListState<PageViewCount> listState;
 
@@ -111,6 +113,35 @@ public class Flink02_Practice_PageView_Window2 {
 
                         Timestamp ts = new Timestamp(ctx.getCurrentKey());
                         out.collect(Tuple2.of(ts.toString(),count));
+
+                        listState.clear();
+
+                    }
+                }).print();*/
+        aggregate.keyBy(PageViewCount::getTime)
+                .process(new KeyedProcessFunction<Long, PageViewCount, Tuple2<String, Integer>>() {
+                    private ValueState<PageViewCount> listState;
+
+                    @Override
+                    public void open(Configuration parameters) throws Exception {
+                        listState = getRuntimeContext().getState(new ValueStateDescriptor<PageViewCount>("value", PageViewCount.class));
+                    }
+
+                    @Override
+                    public void processElement(PageViewCount value, Context ctx, Collector<Tuple2<String, Integer>> out) throws Exception {
+                        Integer count = value.getCount();
+                        if (listState.value() != null) {
+                            count += listState.value().getCount();
+                        }
+                        listState.update(new PageViewCount(value.getPv(),value.getTime(),count));
+                        ctx.timerService().registerEventTimeTimer(ctx.getCurrentKey() + 1);
+                    }
+
+                    @Override
+                    public void onTimer(long timestamp, OnTimerContext ctx, Collector<Tuple2<String, Integer>> out) throws Exception {
+
+                        Timestamp ts = new Timestamp(ctx.getCurrentKey());
+                        out.collect(Tuple2.of(ts.toString(),listState.value().getCount()));
 
                         listState.clear();
 
