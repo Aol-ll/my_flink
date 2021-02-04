@@ -30,6 +30,7 @@ import java.util.ArrayList;
 public class Flink06_Practice_ItemCountTopN {
     public static void main(String[] args) throws Exception {
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
+        env.setParallelism(1);
 
         WatermarkStrategy<UserBehavior> userBehaviorWatermarkStrategy = WatermarkStrategy.<UserBehavior>forMonotonousTimestamps()
                 .withTimestampAssigner((e, s) -> e.getTimestamp() * 1000L);
@@ -126,7 +127,7 @@ public class Flink06_Practice_ItemCountTopN {
                                 .append("\n");
                         listState.clear();
                         out.collect(sb.toString());
-                        Thread.sleep(2000);
+//                        Thread.sleep(2000);
                     }
                 })
                 .print();
